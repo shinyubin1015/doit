@@ -5,6 +5,9 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 export default defineConfig({
   appType: "spa", // ✅ 이거 추가 (라우터 직접접속 404 해결)
   plugins: [react(), cloudflare()],
+  build: {
+    outDir: "dist/client",
+  },
   server: {
     proxy: {
       "/api": "http://localhost:8790",
