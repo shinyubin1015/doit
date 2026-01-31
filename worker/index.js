@@ -47,9 +47,27 @@ export default {
     }
 
     // 404
-    return new Response(JSON.stringify({ message: "Not Found" }), { 
+    // If the request is not for the API, try to serve static assets (SPA fallback)
+    if (!url.pathname.startsWith("/api")) {
+      try {
+        // Attempt to fetch the asset from the Pages assets binding
+        const assetResponse = await env.ASSETS.fetch(request);
+        if (assetResponse && assetResponse.status !== 404) return assetResponse;
+
+        // Fallback to index.html for SPA routes
+        const indexReq = new Request(new URL("/index.html", request.url).toString(), request);
+        return await env.ASSETS.fetch(indexReq);
+      } catch (e) {
+        return new Response(JSON.stringify({ message: "Not Found" }), {
+          status: 404,
+          headers: { "content-type": "application/json" },
+        });
+      }
+    }
+
+    return new Response(JSON.stringify({ message: "Not Found" }), {
       status: 404,
-      headers: { "content-type": "application/json" }
+      headers: { "content-type": "application/json" },
     });
   }
 }
